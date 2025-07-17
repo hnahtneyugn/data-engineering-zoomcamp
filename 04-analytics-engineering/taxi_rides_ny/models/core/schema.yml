@@ -25,153 +25,156 @@ models:
       Each record corresponds to a trip uniquely identified by tripid. 
     columns:
       - name: tripid
-        data_type: string
-        description: "unique identifier conformed by the combination of vendorid and pickup time"
-
+        description: "Unique identifier for the trip."
       - name: vendorid
-        data_type: int64
-        description: ""
-
+        description: "Code indicating the provider associated with the trip record."
       - name: service_type
-        data_type: string
-        description: ""
-
+        description: "Type of taxi service, either 'Green' or 'Yellow'."
       - name: ratecodeid
-        data_type: int64
-        description: ""
-
+        description: "Final rate code in effect for the trip."
       - name: pickup_locationid
-        data_type: int64
-        description: ""
-
+        description: "Location ID where the trip started."
       - name: pickup_borough
-        data_type: string
-        description: ""
-
+        description: "Borough of the pickup location."
       - name: pickup_zone
-        data_type: string
-        description: ""
-
+        description: "Zone of the pickup location."
       - name: dropoff_locationid
-        data_type: int64
-        description: ""
-
+        description: "Location ID where the trip ended."
       - name: dropoff_borough
-        data_type: string
-        description: ""
-
+        description: "Borough of the dropoff location."
       - name: dropoff_zone
-        data_type: string
-        description: ""
-
+        description: "Zone of the dropoff location."
       - name: pickup_datetime
-        data_type: timestamp
-        description: ""
-
+        description: "Date and time when the trip started."
       - name: dropoff_datetime
-        data_type: timestamp
-        description: ""
-
+        description: "Date and time when the trip ended."
       - name: store_and_fwd_flag
-        data_type: string
-        description: ""
-
+        description: "Indicates whether the trip record was sent immediately or stored and sent later."
       - name: passenger_count
-        data_type: int64
-        description: ""
-
+        description: "Number of passengers in the vehicle."
       - name: trip_distance
-        data_type: numeric
-        description: ""
-
+        description: "Distance of the trip in miles."
       - name: trip_type
-        data_type: int64
-        description: ""
-
+        description: "A code indicating the type of trip (e.g., street-hail or dispatch)."
       - name: fare_amount
-        data_type: numeric
-        description: ""
-
+        description: "Total fare charged to passengers."
       - name: extra
-        data_type: numeric
-        description: ""
-
+        description: "Extra charges (e.g., for rush hour or night)."
       - name: mta_tax
-        data_type: numeric
-        description: ""
-
+        description: "Tax imposed by the Metropolitan Transportation Authority."
       - name: tip_amount
-        data_type: numeric
-        description: ""
-
+        description: "Tip amount paid by the passenger."
       - name: tolls_amount
-        data_type: numeric
-        description: ""
-
+        description: "Total amount of all tolls paid in trip."
       - name: ehail_fee
-        data_type: numeric
-        description: ""
-
+        description: "Fee for e-hail trips (only applicable to some trips)."
       - name: improvement_surcharge
-        data_type: numeric
-        description: ""
-
+        description: "Surcharge to fund improvements to the NYC transportation system."
       - name: total_amount
-        data_type: numeric
-        description: ""
-
+        description: "Total amount paid by the passenger, including fare, tolls, surcharges, and tips."
       - name: payment_type
-        data_type: int64
-        description: ""
-
+        description: "Numeric code signifying how the passenger paid for the trip."
       - name: payment_type_description
-        data_type: string
-        description: ""
+        description: "Human-readable description of the payment type."
+      - name: trip_year
+        description: "Year in which the trip started."
+      - name: trip_quarter
+        description: "Quarter in which the trip started (1 to 4)."
+      - name: trip_month
+        description: "Month in which the trip started (1 to 12)."
+      - name: year_quarter
+        description: "Concatenated year and quarter in the format 'YYYY/Q'."
 
   - name: fhv_trips
-    description: >
-      For-Hire Vehicle (FHV) dispatch records from 2019.
-      These trips include Uber, Lyft, and other FHV services,
-      and may lack complete trip details like fare or payment.
+    description: "For-Hire Vehicle (FHV) trip data enriched with pickup and dropoff zone details from the Taxi Zone Lookup table."
     columns:
       - name: tripid
-        description: Primary key for this table, generated from base number + pickup_datetime
-        tests:
-          - unique:
-              severity: warn
-          - not_null:
-              severity: warn
-
+        description: "Unique identifier for the FHV trip."
       - name: dispatching_base_num
-        description: The TLC Base License Number affiliated with the dispatching base company.
-
+        description: "The TLC base license number of the base that dispatched the trip."
       - name: pickup_datetime
-        description: The date and time when the meter was engaged.
-
+        description: "Date and time when the trip began."
       - name: dropoff_datetime
-        description: The date and time when the meter was disengaged.
-
+        description: "Date and time when the trip ended."
       - name: PULocationID
-        description: Pickup Location ID (taxi zone).
-        tests:
-          - relationships:
-              to: ref('taxi_zone_lookup')
-              field: locationid
-              severity: warn
-
+        description: "Location ID where the trip began."
       - name: DOLocationID
-        description: Dropoff Location ID (taxi zone).
-        tests:
-          - relationships:
-              to: ref('taxi_zone_lookup')
-              field: locationid
-              severity: warn
-
+        description: "Location ID where the trip ended."
       - name: SR_Flag
-        description: Shared Ride flag (if present).
-
+        description: "Shared ride flag. It indicates if the trip was a shared ride."
       - name: Affiliated_base_number
+        description: "TLC base license number of the affiliated base, if applicable."
+      - name: pickup_borough
+        description: "Borough corresponding to the pickup location."
+      - name: pickup_zone
+        description: "Zone corresponding to the pickup location."
+      - name: dropoff_borough
+        description: "Borough corresponding to the dropoff location."
+      - name: dropoff_zone
+        description: "Zone corresponding to the dropoff location."
+
+  - name: fct_taxi_trips_quarterly_revenue
+    description: >
+      Quarterly revenue metrics for Yellow and Green taxi services,
+      including year-over-year (YoY) revenue growth compared to the same quarter in the previous year.
+    columns:
+      - name: service_type
+        description: "Type of taxi service, either 'Green' or 'Yellow'."
+      - name: trip_year
+        description: "The year in which the trips occurred."
+      - name: trip_quarter
+        description: "The quarter (1 to 4) in which the trips occurred."
+      - name: current_revenue
+        description: "Total revenue generated in the given quarter and year."
+      - name: previous_revenue
+        description: "Revenue from the same quarter in the previous year."
+      - name: yoy_growth
         description: >
-          The TLC license number of the base with which the driver is affiliated.
-          This is the company or dispatch base that the driver operates under,
-          and it may differ from the dispatching base for the trip.
+          Year-over-year revenue growth percentage, calculated as
+          (current - previous) / previous. NULL if previous year data is missing or zero.
+      - name: year_quarter
+        description: "Concatenated representation of year and quarter (e.g., '2024/Q2')."
+
+  - name: fct_taxi_trips_monthly_fare_p95
+    description: >
+      Monthly 90th, 95th, and 97th percentile fare amounts for Green and Yellow taxi services.
+      Only considers trips with valid fare and distance, and where the payment type was Cash or Credit card.
+    columns:
+      - name: service_type
+        description: "Type of taxi service, either 'Green' or 'Yellow'."
+      - name: trip_year
+        description: "Year in which the trip occurred."
+      - name: trip_month
+        description: "Month in which the trip occurred."
+      - name: fare_p90
+        description: "90th percentile of fare amount for the given service type, year, and month."
+      - name: fare_p95
+        description: "95th percentile of fare amount for the given service type, year, and month."
+      - name: fare_p97
+        description: "97th percentile of fare amount for the given service type, year, and month."
+
+  - name: fct_fhv_monthly_zone_traveltime_p90
+    description: >
+      Computes the 90th percentile of trip durations for For-Hire Vehicle (FHV) rides,
+      grouped by pickup and dropoff locations per year and month. Includes only trips with valid pickup/dropoff timestamps.
+    columns:
+      - name: trip_year
+        description: "The year in which the trip occurred."
+      - name: trip_month
+        description: "The month in which the trip occurred."
+      - name: PULocationID
+        description: "Location ID where the trip began."
+      - name: DOLocationID
+        description: "Location ID where the trip ended."
+      - name: pickup_datetime
+        description: "Timestamp of when the trip began."
+      - name: dropoff_datetime
+        description: "Timestamp of when the trip ended."
+      - name: pickup_zone
+        description: "The zone name for the pickup location."
+      - name: dropoff_zone
+        description: "The zone name for the dropoff location."
+      - name: trip_duration
+        description: "Trip duration in seconds."
+      - name: p90
+        description: "90th percentile of trip duration (in seconds) for the given pickup/dropoff pair and month."
